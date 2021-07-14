@@ -1,0 +1,281 @@
+{% extends 'store/main.html' %}
+
+{% block content %}
+	<!-- BREADCRUMB -->
+	<div id="breadcrumb" class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+				<div class="col-md-12">
+					<h3 class="breadcrumb-header">Checkout</h3>
+					<ul class="breadcrumb-tree">
+						<li><a href="{% url 'store' %}">Home</a></li>
+						<li class="active">Checkout</li>
+					</ul>
+				</div>
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /BREADCRUMB -->
+
+	<!-- SECTION -->
+	<div class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+
+				<div class="col-md-7">
+					<form id="form">
+						<!-- Billing Details -->
+						<div class="billing-details" id='billing-details'>
+							<div class="section-title">
+								<h3 class="title">Billing address</h3>
+							</div>
+							<div class="form-group">
+								<input required class="input" type="text" name="name" placeholder="Name">
+							</div>
+							<div class="form-group">
+								<input required class="input" type="email" name="email" placeholder="Email">
+							</div>													
+						</div>
+						<!-- /Billing Details -->
+
+						<!-- Shipping Details -->
+						<div class="shipping-details" id='shipping-details'>
+							<div class="section-title">
+								<h3 class="title">Shipping address</h3>
+							</div>
+							<div class="caption">
+								<div class="form-group">
+									<input class="input" type="text" name="address" placeholder="Address">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="city" placeholder="City">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="country" placeholder="Country">
+								</div>
+								<div class="form-group">
+									<input class="input" type="text" name="zip_code" placeholder="ZIP Code">
+								</div>
+							</div>
+						</div>
+						<!-- /Shipping Details -->
+
+						<!-- Order notes -->
+						<div class="order-notes">
+							<textarea class="input" placeholder="Order Notes"></textarea>
+						</div>
+						<!-- /Order notes -->
+						<input type="submit" id="form-button" class="primary-btn order-submit" value="Continue">
+					</form>
+
+					<!-- Payment Info -->
+					<div class="payment-details hidden" id="payment-details">
+						<small>Paypal option</small>
+						<div id="paypal-button-container"></div>
+						<!-- <button id="make-payment">Make payment</button> -->
+					</div>
+					<!-- /Payment Info -->
+				</div>
+
+				<!-- Order Details -->
+				<div class="col-md-5 order-details">
+					<div class="section-title text-center">
+						<h3 class="title">Your Order</h3>
+					</div>
+					<div class="order-summary">
+						<div class="order-col">
+							<div><strong>PRODUCT</strong></div>
+							<div><strong>TOTAL</strong></div>
+						</div>
+						<div class="order-products">
+							{% for item in items %}
+							<div class="order-col">
+								<div><button data-product={{item.product.id}} data-action="removeAll" class="delete update-cart"><i class="fa fa-close"></i></button><button data-product={{item.product.id}} data-action="add" class="update-cart"><i class="fa fa-plus"></i></button>{{ item.quantity }} <button data-product={{item.product.id}} data-action="remove" class="update-cart"><i class="fa fa-minus"></i></button> x {{ item.product.name }}</div>
+								<div>${{ item.product.price }}</div>
+							</div>
+							{% endfor %}
+						</div>
+						<div class="order-col">
+							<div>Shipping</div>
+							<div><strong>FREE</strong></div>
+						</div>
+						<div class="order-col">
+							<div><strong>TOTAL</strong></div>
+							<div><strong class="order-total">${{ order.get_cart_total|floatformat:2 }}</strong></div>
+						</div>
+					</div>
+					<div class="payment-method">
+						<div class="input-radio">
+							<input type="radio" name="payment" id="payment-1">
+							<label for="payment-1">
+								<span></span>
+								Direct Bank Transfer
+							</label>
+							<div class="caption">
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+							</div>
+						</div>
+						<div class="input-radio">
+							<input type="radio" name="payment" id="payment-2">
+							<label for="payment-2">
+								<span></span>
+								Cheque Payment
+							</label>
+							<div class="caption">
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+							</div>
+						</div>
+						<div class="input-radio">
+							<input type="radio" name="payment" id="payment-3">
+							<label for="payment-3">
+								<span></span>
+								Paypal System
+							</label>
+							<div class="caption">
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+							</div>
+						</div>
+					</div>
+					<div class="input-checkbox">
+						<input type="checkbox" id="terms">
+						<label for="terms">
+							<span></span>
+							I've read and accept the <a href="#">terms & conditions</a>
+						</label>
+					</div>
+				</div>
+				<!-- /Order Details -->
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /SECTION -->
+
+	<script src="https://www.paypal.com/sdk/js?client-id=AZRq1RbdeMFdeGFJkgrKpz2UEu_dhJ3IEfBLEtvPQw388v8asncblTdlmYnbPMmQ37N1YkDPgLRdKRdT&currency=USD&disable-funding=giropay,sepa"></script>
+
+	<script>
+		total = '{{order.get_cart_total}}'
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+
+			style: {
+				color: 'blue',
+			},
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: parseFloat(total).toFixed(2)
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    submitFormData()
+                });
+            }
+
+
+        }).render('#paypal-button-container');
+    </script>
+
+	<script type="text/javascript">
+		var shipping = '{{order.shipping}}'
+
+		if (shipping == 'False') {
+			document.getElementById('shipping-details').innerHTML = ''
+		}
+
+		if (user != 'AnonymousUser') {
+			document.getElementById('billing-details').innerHTML = ''
+		}
+
+		if (shipping == 'False' && user != 'AnonymousUser') {
+			document.getElementById('shipping-details').classList.add('hidden')
+			document.getElementById('billing-details').classList.add('hidden')
+		}
+
+		var form = document.getElementById('form')
+		
+		form.addEventListener('submit', function(e){
+			e.preventDefault()
+			console.log('Form submitted')
+			document.getElementById('form-button').classList.add('hidden')
+			document.getElementById('payment-details').classList.remove('hidden')
+		})
+
+		/*
+		document.getElementById('make-payment').addEventListener('click', function(e) {
+			submitFormData()
+		})
+		*/
+
+		function submitFormData(){
+			console.log('Payment button clicked')
+
+			var userFormData = {
+				'name': null,
+				'email': null,
+				'total': total,
+			}
+
+			var shippingInfo = {
+				'address': null,
+				'city': null,
+				'state': null,
+				'zipcode': null,
+			}
+
+			if (shipping != 'False') {
+				shippingInfo.address = form.address.value
+				shippingInfo.city = form.city.value
+				shippingInfo.state = form.country.value
+				shippingInfo.zipcode = form.zip_code.value
+			}
+
+			if (user == 'AnonymousUser') {
+				userFormData.name = form.name.value
+				userFormData.email = form.email.value
+			}
+
+			var url = '/process_oder/'
+
+			fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',	
+					'X-CSRFToken': csrftoken,
+				},
+				body: JSON.stringify({'form': userFormData, 'shipping': shippingInfo})
+			})
+
+			.then((response) => {
+				return response.json()
+			})
+
+			.then((data) => {
+				console.log('Success:', data)
+				alert('Transaction completed')
+
+				cart = {}
+				document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/'
+
+				window.location.href = "{% url 'store' %}"
+			})
+		}
+	</script>
+
+
+{% endblock %}
